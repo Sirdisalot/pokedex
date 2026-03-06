@@ -1,54 +1,68 @@
 package main
 
 import (
-	"strings"
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
-func cleanInput (text string) []string {
+func startRepl(cfg *config) {
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Print("Pokedex >")
+		scanner.Scan()
+		words := cleanInput(scanner.Text())
+		if len(words) == 0 {
+			continue
+		}
+		commandName := words[0]
+		command, exists := getCommands()[commandName]
+		if exists {
+			err := command.callback(cfg)
+			if err != nil {
+				fmt.Println(err)
+			}
+			continue
+		} else {
+			fmt.Println("Unkown command")
+		}
+	}
+}
+
+func cleanInput(text string) []string {
 	lowered := strings.ToLower(text)
 	words := strings.Fields(lowered)
 	return words
 }
 
 type cliCommand struct {
-	name		string
+	name        string
 	description string
-	callback	func() error
+	callback    func(*config) error
 }
 
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"exit": {
-			name:			"exit",
-			description:	"Exit the Pokedex",
-			callback:		commandExit,
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
 		},
 		"help": {
-			name:			"help",
-			description:	"Displays a help message",
-			callback:		commandHelp,
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Displays the names of 20 locastion areas",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous 20 locations",
+			callback:    commandMapb,
 		},
 	}
-}
-
-func commandExit() error {
-	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
-	return nil
-}
-
-func commandHelp() error {
-	fmt.Println()
-	fmt.Println("Welcome to the Pokedex!")
-	fmt.Println("Usage:")
-	fmt.Println()
-
-	for _, cmd := range getCommands() {
-		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
-	}
-
-	fmt.Println()
-	return nil
 }
