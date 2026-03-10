@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/sirdisalot/pokedexcli/internal/pokeapi"
 )
 
@@ -12,7 +14,7 @@ type config struct {
 
 func main() {
 	//scanner := bufio.NewScanner(os.Stdin)
-	pokeClient := pokeapi.NewClient()
+	pokeClient := pokeapi.NewClient(5*time.Second, 5*time.Minute)
 	cfg := &config{
 		pokeapiClient: pokeClient,
 	}
